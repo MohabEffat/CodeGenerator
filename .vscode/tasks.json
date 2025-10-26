@@ -1,0 +1,128 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "kill: port",
+      "type": "shell",
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "scripts\\kill-port.ps1",
+          "${input:port}"
+        ]
+      },
+      "command": "bash",
+      "args": [
+        "-lc",
+        "(lsof -ti :${input:port} 2>/dev/null | xargs -r kill -9) || true"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "postman: env",
+      "type": "shell",
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "postman\\update-env.ps1",
+          "-Input",
+          "postman\\Local.postman_environment.json",
+          "-Output",
+          "postman\\Local.tmp.postman_environment.json",
+          "-Port",
+          "${input:port}"
+        ]
+      },
+      "command": "bash",
+      "args": [
+        "-lc",
+        "pwsh -NoProfile -File postman/update-env.ps1 -Input postman/Local.postman_environment.json -Output postman/Local.tmp.postman_environment.json -Port ${input:port}"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "serve: dotnet",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--urls",
+        "http://localhost:${input:port}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet-serve",
+        "pattern": [
+          {
+            "regexp": ".*"
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "(Now listening on: .*)|(Application started\\.)"
+        }
+      }
+    },
+    {
+      "label": "test: newman",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "postman/run-collection.sh",
+        "postman/CodeGenerator.postman_collection.json",
+        "postman/Local.tmp.postman_environment.json"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "postman\\run-collection.ps1",
+          "-Collection",
+          "postman\\CodeGenerator.postman_collection.json",
+          "-Environment",
+          "postman\\Local.tmp.postman_environment.json"
+        ]
+      }
+    },
+    {
+      "label": "test: API e2e (Postman)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "kill: port",
+        "postman: env",
+        "serve: dotnet",
+        "test: newman"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "port",
+      "type": "promptString",
+      "description": "Port to run the API on",
+      "default": "5080"
+    }
+  ]
+}

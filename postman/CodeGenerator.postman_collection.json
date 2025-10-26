@@ -1,0 +1,248 @@
+﻿{
+    "info":  {
+                 "name":  "CodeGenerator API",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "variable":  [
+                     {
+                         "key":  "baseUrl",
+                         "value":  "http://localhost:5080",
+                         "type":  "string"
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "Health",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{baseUrl}}/health",
+                                                 "host":  [
+                                                              "{{baseUrl}}"
+                                                          ],
+                                                 "path":  [
+                                                              "health"
+                                                          ]
+                                             }
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027status 200\u0027, () =\u003e pm.response.code === 200);",
+                                                                   "const json = pm.response.json();",
+                                                                   "pm.test(\u0027ok status\u0027, () =\u003e json.status === \u0027ok\u0027);"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "Validate - OK",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{baseUrl}}/validate?prefix=TJ\u0026count=1000000\u0026year=25",
+                                                 "host":  [
+                                                              "{{baseUrl}}"
+                                                          ],
+                                                 "path":  [
+                                                              "validate"
+                                                          ],
+                                                 "query":  [
+                                                               {
+                                                                   "key":  "prefix",
+                                                                   "value":  "TJ"
+                                                               },
+                                                               {
+                                                                   "key":  "count",
+                                                                   "value":  "1000000"
+                                                               },
+                                                               {
+                                                                   "key":  "year",
+                                                                   "value":  "25"
+                                                               }
+                                                           ]
+                                             }
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027status 200\u0027, () =\u003e pm.response.code === 200);",
+                                                                   "const json = pm.response.json();",
+                                                                   "pm.test(\u0027ok true\u0027, () =\u003e json.ok === true);",
+                                                                   "pm.test(\u0027no errors\u0027, () =\u003e Array.isArray(json.errors) \u0026\u0026 json.errors.length === 0);"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "Validate - Invalid",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{baseUrl}}/validate?prefix=Tx\u0026count=0\u0026year=2a",
+                                                 "host":  [
+                                                              "{{baseUrl}}"
+                                                          ],
+                                                 "path":  [
+                                                              "validate"
+                                                          ],
+                                                 "query":  [
+                                                               {
+                                                                   "key":  "prefix",
+                                                                   "value":  "Tx"
+                                                               },
+                                                               {
+                                                                   "key":  "count",
+                                                                   "value":  "0"
+                                                               },
+                                                               {
+                                                                   "key":  "year",
+                                                                   "value":  "2a"
+                                                               }
+                                                           ]
+                                             }
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027status 200\u0027, () =\u003e pm.response.code === 200);",
+                                                                   "const json = pm.response.json();",
+                                                                   "pm.test(\u0027ok false\u0027, () =\u003e json.ok === false);",
+                                                                   "pm.test(\u0027has errors\u0027, () =\u003e Array.isArray(json.errors) \u0026\u0026 json.errors.length \u003e= 1);"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "Generate JSON (3)",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{baseUrl}}/generate?prefix=TJ\u0026count=3\u0026year=25",
+                                                 "host":  [
+                                                              "{{baseUrl}}"
+                                                          ],
+                                                 "path":  [
+                                                              "generate"
+                                                          ],
+                                                 "query":  [
+                                                               {
+                                                                   "key":  "prefix",
+                                                                   "value":  "TJ"
+                                                               },
+                                                               {
+                                                                   "key":  "count",
+                                                                   "value":  "3"
+                                                               },
+                                                               {
+                                                                   "key":  "year",
+                                                                   "value":  "25"
+                                                               }
+                                                           ]
+                                             }
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027status 200\u0027, () =\u003e pm.response.code === 200);",
+                                                                   "const json = pm.response.json();",
+                                                                   "pm.test(\u00273 codes\u0027, () =\u003e Array.isArray(json.codes) \u0026\u0026 json.codes.length === 3);",
+                                                                   "json.codes.forEach(c =\u003e pm.expect(c.length).to.eql(13));",
+                                                                   "pm.collectionVariables.set(\u0027lastCode\u0027, json.codes[0]);"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "Checksum (from lastCode)",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{baseUrl}}/checksum?code={{lastCode}}",
+                                                 "host":  [
+                                                              "{{baseUrl}}"
+                                                          ],
+                                                 "path":  [
+                                                              "checksum"
+                                                          ],
+                                                 "query":  [
+                                                               {
+                                                                   "key":  "code",
+                                                                   "value":  "{{lastCode}}"
+                                                               }
+                                                           ]
+                                             }
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027status 200\u0027, () =\u003e pm.response.code === 200);",
+                                                                   "const json = pm.response.json();",
+                                                                   "pm.test(\u0027valid checksum\u0027, () =\u003e json.valid === true || json.fullCode);"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "Generate CSV (5)",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{baseUrl}}/generate-csv?prefix=TJ\u0026count=5\u0026year=25",
+                                                 "host":  [
+                                                              "{{baseUrl}}"
+                                                          ],
+                                                 "path":  [
+                                                              "generate-csv"
+                                                          ],
+                                                 "query":  [
+                                                               {
+                                                                   "key":  "prefix",
+                                                                   "value":  "TJ"
+                                                               },
+                                                               {
+                                                                   "key":  "count",
+                                                                   "value":  "5"
+                                                               },
+                                                               {
+                                                                   "key":  "year",
+                                                                   "value":  "25"
+                                                               }
+                                                           ]
+                                             }
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027status 200\u0027, () =\u003e pm.response.code === 200);",
+                                                                   "pm.test(\u0027csv content-type\u0027, () =\u003e (pm.response.headers.get(\u0027Content-Type\u0027)||\u0027\u0027).includes(\u0027text/csv\u0027));"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 }
+             ]
+}
