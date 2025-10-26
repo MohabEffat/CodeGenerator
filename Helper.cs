@@ -35,32 +35,22 @@
             { 'X', 13 },
             { 'Z', 1 }
         };
-    }
-
-    public class uCodeCalculator
-    {
-        private readonly string _code;
-        public uCodeCalculator(string code)
-        {
-            _code = code;
-        }
-
-        public int CalculateWeights()
+        public static int CalculateWeights(string code)
         {
             int sum = 0;
-            for (int i = 0; i < _code.Length; i++)
+            for (int i = 0; i < code.Length; i++)
             {
-                char c = _code[i];
-                if (Helper.Values.TryGetValue(c, out int value))
+                char c = code[i];
+                if (Values.TryGetValue(c, out int value))
                 {
                     sum += value;
                 }
             }
-            return sum ;
+            return sum;
         }
-        public int CalculateChecksum()
+        public static int CalculateChecksum(string code)
         {
-            int Weight = CalculateWeights();
+            int Weight = CalculateWeights(code);
 
             int firDigit = Weight % 10;
             int secDigit = (Weight / 10) % 10;
@@ -70,10 +60,10 @@
 
             int[] arrayOfValuesAndWeights = { thirdDigit, secDigit, firDigit };
 
-            for (int i = 0; i < _code.Length; i++)
+            for (int i = 0; i < code.Length; i++)
             {
-                char c = _code[i];
-                if (Helper.Values.TryGetValue(c, out int value))
+                char c = code[i];
+                if (Values.TryGetValue(c, out int value))
                 {
                     sumOfModules += value * arrayOfValuesAndWeights[i % 3];
                 }
@@ -83,14 +73,8 @@
             int checksum = roundedSum - sumOfModules;
             return checksum;
         }
-        public string GenerateFullCode()
-        {
-            int checksum = CalculateChecksum();
-            return String.Concat(_code, checksum.ToString());
-        }
+
     }
-
-
     public class uCodeGenerator
     {
         private readonly char[] chars =
@@ -106,10 +90,18 @@
 
         private readonly string _year = "25";
 
+        private int _sequence = 0;
+
         public string GenerateCode(string prefix)
         {
             if (prefix.Length != 2 || !prefix.All(c => chars.Contains(c)))
                 throw new ArgumentException("Prefix must be exactly 2 allowed characters.");
+
+            if (_sequence > 999999)
+                throw new InvalidOperationException("All possible codes have been generated.");
+
+            string numericPart = _sequence.ToString("D6");
+            _sequence++;
 
             Random random = new Random();
 
@@ -123,49 +115,16 @@
 
             codeChars[3] = _year[1];
 
-            for (int i = 4; i < 10; i++)
-            {
-                codeChars[i] = (char)('0' + random.Next(10));
-            }
 
-            codeChars [10] = charsWithoutVowels[random.Next(charsWithoutVowels.Length)];
+            for (int i = 0; i < 6; i++)
+                codeChars[4 + i] = numericPart[i];
+
+            codeChars[10] = charsWithoutVowels[random.Next(charsWithoutVowels.Length)];
             codeChars [11] = charsWithoutVowels[random.Next(charsWithoutVowels.Length)];
 
-            return new string(codeChars);
-        }
-
-        private string a = "0";
-        private string b = "10";
-        private string c = "100";
-
-        private string Next()
-        {
-            int ai = int.Parse(a);
-            int bi = int.Parse(b);
-            int ci = int.Parse(c);
-
-            ai++;
-
-            if (ai > 9)
-            {
-                ai = 0;
-                bi++;
-            }
-
-            if (bi > 99)
-            {
-                bi = 10;
-                ci++;
-            }
-
-            if (ci > 999)
-                throw new InvalidOperationException("Sequence overflow (C > 999)");
-
-            a = ai.ToString("0");
-            b = bi.ToString("00");
-            c = ci.ToString("000");
-
-            return $"{a}{b}{c}";
+            var code = new string(codeChars);
+            var fullCode = code + Helper.CalculateChecksum(code);
+            return fullCode;
         }
     }
 }
